@@ -9,8 +9,20 @@ var io = require('socket.io')(http);
 //Use express static to expose a folder
 app.use(express.static(__dirname + '/public'));
 //Allow to listen for event 'connection' and then call function
-io.on('connection', function () {
+io.on('connection', function (socket) {
 	console.log('User connected via socket.io!');
+	
+	socket.on('message', function (message) {
+		console.log('Message received: ' + message.text);
+
+		//Send to everybody excluding person who sent it
+		//For sending to everybody including sendor use socket.emit
+		socket.broadcast.emit('message', message);
+	});
+
+	socket.emit('message', {
+		text: 'Welcome to the chat application'
+	});
 });
 
 http.listen(PORT, function () {
