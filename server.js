@@ -15,9 +15,10 @@ io.on('connection', function (socket) {
 	socket.on('message', function (message) {
 		console.log('Message received: ' + message.text);
 
-		//Send to everybody excluding person who sent it
-		//For sending to everybody including sendor use socket.emit
-		socket.broadcast.emit('message', message);
+		//Send to everybody excluding person who sent it use socket.broadcast.emit
+		//For sending to everybody including sendor use io.emit
+		//socket.broadcast.emit('message', message);
+		io.emit('message', message);
 	});
 
 	socket.emit('message', {
