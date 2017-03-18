@@ -9,10 +9,23 @@ var moment = require('moment');
 
 //Use express static to expose a folder
 app.use(express.static(__dirname + '/public'));
+
+var clientInfo = {};
+
 //Allow to listen for event 'connection' and then call function
 io.on('connection', function (socket) {
 	console.log('User connected via socket.io!');
 	
+	socket.on('joinRoom', function (req) {
+		clientInfo[socket.id] = req;
+		socket.join(req.room);
+		socket.broadcast.to(req.room).emit('message', {
+			name: 'System',
+			text: req.name + ' has joined!',
+			timestamp: moment().valueOf()
+		});
+	});
+
 	//Individual message that user sends
 	socket.on('message', function (message) {
 		console.log('Message received: ' + message.text);
@@ -21,7 +34,8 @@ io.on('connection', function (socket) {
 		//Send to everybody excluding person who sent it use socket.broadcast.emit
 		//For sending to everybody including sendor use io.emit
 		//socket.broadcast.emit('message', message);
-		io.emit('message', message);
+		//io.emit('message', message);
+		io.to(clientInfo[socket.id].room).emit('message', message);
 	});
 
 	//Initial system message to all users
